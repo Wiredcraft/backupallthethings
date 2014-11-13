@@ -130,7 +130,7 @@ Lots of things to do... A quick list below non-prioritized.
 
 # Disclaimer
 
-The devops-backup tool is in early development stage and may break, erase data, corrupt filesytem, burn trees and even responsible for global warming (who knows!). Use at your own risk. devo.ps is in no way reponsible in the event of something wrong happen.
+The devops-backup tool is in early development stage and may break, erase data, corrupt filesytem, burn trees, spill your coffee on your keyboard and even be responsible for global warming (who knows!). Use at your own risk. devo.ps is in no way reponsible in the event of something wrong happen.
 
 # License
 
