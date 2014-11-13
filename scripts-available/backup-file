@@ -1,0 +1,56 @@
+#!/bin/bash
+##################
+# devo.ps backup collection
+##################
+# Description:
+#  File backup approach is simply to copy the files (when on a single server)
+##################
+
+SELF=$(basename -s .sh $0)
+SERVICE=${SELF#backup-}
+
+# Data available from ENV
+DEST=$DEVOPS_BACKUP_DEST
+
+# 
+CONF_FOLDER=/opt/devops/backup/conf
+CONF_FILE=$CONF_FOLDER/$SELF.conf
+
+# Load main backup config file
+if [ ! -e "$CONF_FOLDER/backup.conf" ]; then
+    echo "Missing main backup config file" >&2
+    exit 1
+else
+    . "$CONF_FOLDER/backup.conf"
+fi
+
+# Load script specific config file
+if [ ! -e "$CONF_FILE" ]; then
+    echo "Missing $SELF backup config file" >&2
+    exit 1
+else
+    . "$CONF_FILE"
+fi
+
+# Prepare destination folder
+DEST_FOLDER=$DEST/$SERVICE
+mkdir -p $DEST_FOLDER
+
+# CouchDB simply require to copy the files
+echo "Start $SERVICE data backup"
+
+args="${@:1}"
+if [ ${#args} -eq 0 ]; then
+    # No arguments provided - Don't save any file other than what is defined in 
+    # the config file
+    echo "Backup config defined files"
+    tar czf $DEST_FOLDER/data.tar.gz $FILE_DATA_DIRS
+    echo "Completed."
+else
+    # Got arguments - backup files individually
+    echo "Backup files"
+    tar czf $DEST_FOLDER/data.tar.gz $args
+    echo "Completed"
+fi
+
+echo "Completed $SERVICE data backup"

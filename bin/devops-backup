@@ -1,0 +1,239 @@
+#!/usr/bin/env python
+"""
+Usage: 
+    devops-backup (--version|--help)
+    devops-backup list [(enabled|disabled|available)]
+    devops-backup enable [<service>...]
+    devops-backup disable [<service>...]
+    devops-backup [--path=<path>] [<service>...] 
+                  [--file=<file>...] [--couchdb-db=<couchdb-db>...]
+                  [--mongodb-db=<mongodb-db>...] [--mysql-db=<mysql-db>...]
+                  [--postgresql-db=<postgresql-db>...] [--redis-db=<redis-db>...]
+
+Options:
+    --path=<path>                       Parent path for all the backup archives [default: /opt/backup/%Y/%m/%d]
+    <service>...                        List of services to backup (can be specified multiple times)
+    --file=<file>...                    List of files/folders to backup (idem)
+    --couchdb-db=<couchdb-db>...        List of CouchDB databases to backup (idem)
+    --mongodb-db=<mongodb-db>...        List of MongoDB databases to backup (idem)
+    --mysql-db=<mysql-db>...            List of MySQL databases to backup (idem)
+    --postgresql-db=<postgresql-db>...  List of PostgreSQL databases to backup (idem)
+    --redis-db=<redis-db>...            List of Redis databases to backup (idem)
+
+Help:
+    devops-backup list                          List the enabled services
+    devops-backup enable <service>...           Enable the listed services
+    devops-backup disable <service>...          Disable the listed services
+
+    devops-backup <service>...                  Backup the listed services
+    devops-backup --file=<file>...              Backup the listed files
+    devops-backup --mysql-db=<mysql-db>...      Backup the listed mysql-databases
+
+Note:
+    If no <service> provided, and devops-backup is invoked without any argument, 
+    all the enabled services will be backuped.
+
+    If you specify `mysql` as <service> without `--mysql-db`, all databases will be
+    backuped. If you specify `--mysql-db` then the `mysql` <service> is implied.
+    Same goes with the other services
+
+Supported services:
+    - file
+    - couchdb
+    - mongodb
+    - mysql
+    - postgresql
+    - redis
+
+Each service configuration (access/login/pass) is defined in their respective 
+configuration files under `/opt/devops/backup/conf`.
+
+Enabled services are linked in `/opt/devops/backup/scripts-enabled`
+"""
+
+import docopt
+import os
+import sys
+import subprocess
+from datetime import datetime
+from time import sleep
+from devopsbackup import __version__
+
+VALID_SERVICES = ['file','couchdb','mongodb','mysql','postgresql','redis']
+BASE_INSTALL = '/opt/devops/backup'
+
+def list_services(args):
+    '''
+    List the enabled services
+    '''
+    if args.get('available'):
+        services = _get_services('scripts-available')
+        if len(services) > 0:
+            print 'Available services:\n\t- %s' % '\n\t- '.join(services)
+        else:
+            print 'No services available.'
+    elif args.get('disabled'):
+        print 'Soon...'
+    else:
+        # By default list enabled
+        services = _get_services('scripts-enabled')
+        if len(services) > 0:
+            print 'Enabled services:\n\t- %s' % '\n\t- '.join(services)
+        else:
+            print 'No services enabled.'
+
+def enable(services):
+    '''
+    Create / Ensure the links in scripts-enabled is present
+    '''
+    print 'Enabling the following services: %s' % ', '.join(services)
+    for service in services:
+        source = os.path.join(BASE_INSTALL, 'scripts-available', 'backup-'+ service)
+        dest = os.path.join(BASE_INSTALL, 'scripts-enabled', 'backup-'+ service)
+        try:
+            os.symlink(source, dest)
+        except Exception as e:
+            print e
+
+
+def disable(services):
+    '''
+    Ensure the links in scripts-enabled is absent
+    '''
+    print 'Disabling the following services: %s' % ', '.join(services)
+    for service in services:
+        try:
+            dest = os.path.join(BASE_INSTALL, 'scripts-enabled', 'backup-'+ service)
+            os.unlink(dest)
+        except Exception as e:
+            print e
+
+def backup(args):
+    '''
+    Execute the backup scripts, passing the various arguments gathered from the CLI
+    '''
+    # Prepare services set
+    services = set(args.get('<service>'))
+    dest = datetime.now().strftime(args.get('--path'))
+
+    # Set environment var for all scripts
+    os.environ.update({'DEVOPS_BACKUP_DEST': dest})
+    try:
+        os.makedirs(dest)
+    except OSError as e:
+        # File exist
+        if e.errno == 17:
+            pass
+        else:
+            raise e
+
+
+    # Prepare the implicit services
+    if len(args.get('--file', [])) > 0:
+        services.add('file')
+    if len(args.get('--couchdb-db', [])) > 0:
+        services.add('couchdb')
+    if len(args.get('--mongodb-db', [])) > 0:
+        services.add('mongodb')
+    if len(args.get('--mysql-db', [])) > 0:
+        services.add('mysql')
+    if len(args.get('--postgresql-db', [])) > 0:
+        services.add('postgresql')
+    if len(args.get('--redis-db', [])) > 0:
+        services.add('redis')
+
+    # Load all the services if none provided
+    if len(services) == 0:
+        services = _get_services('scripts-enabled')
+
+    for service in services:
+        if service not in VALID_SERVICES:
+            sys.stderr.write('Skipping invalid service: %s\n' % service)
+            continue
+
+        service_script = os.path.join(BASE_INSTALL, 'scripts-available', 'backup-'+ service)
+        command = [service_script]
+
+        if service == 'file':
+            command.extend(args.get('--file'))
+        elif service == 'couchdb':
+            command.extend(args.get('--couchdb-db'))
+        elif service == 'mongodb':
+            command.extend(args.get('--mongodb-db'))
+        elif service == 'mysql':
+            command.extend(args.get('--mysql-db'))
+        elif service == 'postgresql':
+            command.extend(args.get('--postgresql-db'))
+        elif service == 'redis':
+            command.extend(args.get('--redis-db'))
+
+        returncode, stdout, stderr = _run(command)
+        print returncode
+        print stdout
+        print stderr
+
+def _get_services(path):
+    '''
+    Get all the services specified in path - matching backup-*
+    '''
+    services = set()
+    scripts_enabled = os.path.join(BASE_INSTALL, path)
+    for script in os.listdir(scripts_enabled):
+        service = script.replace('backup-','')
+        services.add(service)
+    return services
+
+def _run(params, stdout=subprocess.PIPE, stderr=subprocess.PIPE):
+    '''
+    Execute a command, Popen wrapper
+    '''
+    if type(params) in (str, unicode):
+        params = [params]
+    
+    if type(params) != list:
+        raise Exception('Invalid params type, need to be string or a list')
+
+    try:
+        p = subprocess.Popen(
+            params,
+            stdout = stdout,
+            stderr = stderr
+        )
+    except OSError as e:
+        return 1, '', e
+
+    # Wait until completion of the process
+    while p.returncode == None:
+        p.poll()
+        sleep(0.1)
+
+    # return a tuple (code, stdout, stderr)
+    return p.returncode, p.stdout.read().strip(), p.stderr.read().strip()
+
+def ensure_root():
+    '''
+    Currently require the run as root (UID=0)
+    '''
+    if os.getuid() != 0:
+        print 'Currently required to run as root. Either swith to root user or use the sudo command.'
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    args = docopt.docopt(
+        __doc__,
+        version="version "+ __version__,
+        help=True
+    )
+
+    if args.get('list'):
+        list_services(args)
+    elif args.get('enable'):
+        ensure_root()
+        enable(args.get('<service>'))
+    elif args.get('disable'):
+        ensure_root()
+        disable(args.get('<service>'))
+    else:
+        ensure_root()
+        backup(args)

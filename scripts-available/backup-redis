@@ -1,0 +1,52 @@
+#!/bin/bash
+##################
+# devo.ps backup collection
+##################
+# Redis backup approach is simply to copy the files (when on a single server)
+##################
+
+SELF=$(basename -s .sh $0)
+SERVICE=${SELF#backup-}
+
+# Data available from ENV
+DEST=$DEVOPS_BACKUP_DEST
+
+# 
+CONF_FOLDER=/opt/devops/backup/conf
+CONF_FILE=$CONF_FOLDER/$SELF.conf
+
+# Load main backup config file
+if [ ! -e "$CONF_FOLDER/backup.conf" ]; then
+    echo "Missing main backup config file" >&2
+    exit 1
+else
+    . "$CONF_FOLDER/backup.conf"
+fi
+
+# Load script specific config file
+if [ ! -e "$CONF_FILE" ]; then
+    echo "Missing $SELF backup config file" >&2
+    exit 1
+else
+    . "$CONF_FILE"
+fi
+
+# Prepare destination folder
+DEST_FOLDER=$DEST/$SERVICE
+mkdir -p $DEST_FOLDER
+
+# CouchDB simply require to copy the files
+echo "Start $SERVICE data backup"
+cd $REDIS_DATA_DIR
+tar czf $DEST_FOLDER/redis_data.tar.gz .
+echo "Completed $SERVICE data backup"
+
+echo "Start $SERVICE log backup"
+cd $REDIS_LOG_DIR
+tar czf $DEST_FOLDER/redis_log.tar.gz .
+echo "Completed $SERVICE log backup"
+
+echo "Start $SERVICE conf backup"
+cd $REDIS_CONF_DIR
+tar czf $DEST_FOLDER/redis_conf.tar.gz .
+echo "Completed $SERVICE conf backup"

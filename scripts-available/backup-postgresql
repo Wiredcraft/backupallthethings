@@ -1,0 +1,70 @@
+#!/bin/bash
+##################
+# devo.ps backup collection
+##################
+# Description:
+#  PostgreSQL backup approach is:
+#   - pg_dump for individual databases
+#   - pg_dumpall when no database name provided
+#  Note; uses postgres to execute the backup
+##################
+
+SELF=$(basename -s .sh $0)
+SERVICE=${SELF#backup-}
+
+# Data available from ENV
+DEST=$DEVOPS_BACKUP_DEST
+
+# 
+CONF_FOLDER=/opt/devops/backup/conf
+CONF_FILE=$CONF_FOLDER/$SELF.conf
+
+# Load main backup config file
+if [ ! -e "$CONF_FOLDER/backup.conf" ]; then
+    echo "Missing main backup config file" >&2
+    exit 1
+else
+    . "$CONF_FOLDER/backup.conf"
+fi
+
+# Load script specific config file
+if [ ! -e "$CONF_FILE" ]; then
+    echo "Missing $SELF backup config file" >&2
+    exit 1
+else
+    . "$CONF_FILE"
+fi
+
+# Prepare destination folder
+DEST_FOLDER=$DEST/$SERVICE
+mkdir -p $DEST_FOLDER
+
+# RUNAS will drop privileges when accessing the database
+if [ ! -z "$BACKUP_USER" ]; then
+    echo "$SERVICE backup will run as $BACKUP_USER"
+    RUNAS="sudo -u $BACKUP_USER "
+fi
+
+
+# CouchDB simply require to copy the files
+echo "Start $SERVICE data backup"
+args="${@:1}"
+
+if [ ${#args} -eq 0 ]; then
+    # No arguments provided - backup all the databases
+    echo -n "Backup all databases at once."
+    $RUNAS pg_dumpall | gzip > $DEST_FOLDER/all_db.sql.gz
+    echo "Completed."
+else
+    # Got arguments - backup databases individually
+    for db in $args
+    do
+        echo -n "Backup database: $db"
+        $RUNAS pg_dump $db | gzip > $DEST_FOLDER/$db.sql.gz
+        echo "Completed."
+    done
+fi
+
+echo "Completed $SERVICE data backup"
+exit 0
+
