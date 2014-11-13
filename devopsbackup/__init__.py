@@ -3,6 +3,7 @@ __author__ = 'Vincent Viallet'
 __author_email__ = 'vincent@devo.ps'
 
 import os
+import sys
 import select
 import subprocess
 from cStringIO import StringIO
