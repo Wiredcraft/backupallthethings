@@ -52,24 +52,27 @@ When ran without parameters, `devops-backup` will attempt to run every enabled b
 sudo devops-backup
 ```
 
-You need to the backup as run.
+You need to run the backup as `root`.
 
 ### Run custom backup
 
 When passing parameters to the `devops-backup` command, it will effectively bypass the default enabled services and attempt to run each of the service provided on the command line.
 
 ```
-# Will run the mysql and file backup scripts with the default values provided in the script and config file.
+# Will run the mysql and file backup scripts with the default values provided in
+# the script and config file.
 sudo devops-backup mysql file
 
 # Will backup only the `wordpress` database and the `/var/www/wordpress` folder
 sudo devops-backup mysql file --mysql-db wordpress --file /var/www/wordpress
 
-# Same as above; the service `mysql` and `file` can be ommitted as they are implicitely defined by the 
+# Same as above; the service `mysql` and `file` can be ommitted as they are 
+# implicitely defined by the 
 # `--mysql-db` and `--file` options
 sudo devops-backup --mysql-db wordpress --file /var/www/wordpress
 
-# You can specify options multiple times as well; it will backup both the wordpress and mysql databases (in different files)
+# You can specify options multiple times as well; it will backup both the 
+# wordpress and mysql databases (in different files)
 sudo devops-backup --mysql-db wordpress --mysql-db mysql
 ```
 
@@ -130,7 +133,7 @@ Lots of things to do... A quick list below non-prioritized.
 
 # Disclaimer
 
-The devops-backup tool is in early development stage and may break, erase data, corrupt filesytem, burn trees, spill your coffee on your keyboard and even be responsible for global warming (who knows!). Use at your own risk. devo.ps is in no way reponsible in the event of something wrong happen.
+The `devops-backup` tool is in early development stage and may break, erase data, corrupt filesytem, burn trees, spill your coffee on your keyboard and even be responsible for global warming (who knows!). Use at your own risk. [devo.ps](http://devo.ps) is in no way reponsible in the event of something wrong happen.
 
 # License
 
