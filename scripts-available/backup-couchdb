@@ -38,16 +38,28 @@ mkdir -p $DEST_FOLDER
 
 # CouchDB simply require to copy the files
 echo "Start $SERVICE data backup"
-cd $COUCHDB_DATA_DIR
-tar czf $DEST_FOLDER/couchdb_data.tar.gz .
-echo "Completed $SERVICE data backup"
+if [ ! -d "$COUCHDB_DATA_DIR" ]; then
+    echo "Invalid folder $COUCHDB_DATA_DIR. Skipping." 
+else
+    cd $COUCHDB_DATA_DIR
+    tar czf $DEST_FOLDER/couchdb_data.tar.gz .
+    echo "Completed $SERVICE data backup"
+fi
 
 echo "Start $SERVICE log backup"
-cd $COUCHDB_LOG_DIR
-tar czf $DEST_FOLDER/couchdb_log.tar.gz .
-echo "Completed $SERVICE log backup"
+if [ ! -d "$COUCHDB_LOG_DIR" ]; then
+    echo "Invalid folder $COUCHDB_LOG_DIR. Skipping."
+else
+    cd $COUCHDB_LOG_DIR
+    tar czf $DEST_FOLDER/couchdb_log.tar.gz .
+    echo "Completed $SERVICE log backup"
+fi
 
 echo "Start $SERVICE conf backup"
-cd $COUCHDB_CONF_DIR
-tar czf $DEST_FOLDER/couchdb_conf.tar.gz .
-echo "Completed $SERVICE conf backup"
+if [ ! -d "$COUCHDB_LOG_DIR" ]; then
+    echo "Invalid folder $COUCHDB_CONF_DIR. Skipping."
+else
+    cd $COUCHDB_CONF_DIR
+    tar czf $DEST_FOLDER/couchdb_conf.tar.gz .
+    echo "Completed $SERVICE conf backup"
+fi

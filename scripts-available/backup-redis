@@ -35,18 +35,30 @@ fi
 DEST_FOLDER=$DEST/$SERVICE
 mkdir -p $DEST_FOLDER
 
-# CouchDB simply require to copy the files
+# Redis simply require to copy the files
 echo "Start $SERVICE data backup"
-cd $REDIS_DATA_DIR
-tar czf $DEST_FOLDER/redis_data.tar.gz .
-echo "Completed $SERVICE data backup"
+if [ ! -d "$REDIS_DATA_DIR" ]; then
+    echo "Invalid folder $REDIS_DATA_DIR. Skipping." 
+else
+    cd $REDIS_DATA_DIR
+    tar czf $DEST_FOLDER/redis_data.tar.gz .
+    echo "Completed $SERVICE data backup"
+fi
 
 echo "Start $SERVICE log backup"
-cd $REDIS_LOG_DIR
-tar czf $DEST_FOLDER/redis_log.tar.gz .
-echo "Completed $SERVICE log backup"
+if [ ! -d "$REDIS_LOG_DIR" ]; then
+    echo "Invalid folder $REDIS_LOG_DIR. Skipping."
+else
+    cd $REDIS_LOG_DIR
+    tar czf $DEST_FOLDER/redis_log.tar.gz .
+    echo "Completed $SERVICE log backup"
+fi
 
 echo "Start $SERVICE conf backup"
-cd $REDIS_CONF_DIR
-tar czf $DEST_FOLDER/redis_conf.tar.gz .
-echo "Completed $SERVICE conf backup"
+if [ ! -d "$REDIS_LOG_DIR" ]; then
+    echo "Invalid folder $REDIS_CONF_DIR. Skipping."
+else
+    cd $REDIS_CONF_DIR
+    tar czf $DEST_FOLDER/redis_conf.tar.gz .
+    echo "Completed $SERVICE conf backup"
+fi
