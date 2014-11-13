@@ -7,6 +7,8 @@ import select
 import subprocess
 from cStringIO import StringIO
 
+PIPE = subprocess.PIPE
+
 # Thanks to http://stackoverflow.com/questions/5486717/python-select-doesnt-signal-all-input-from-pipe
 class LineReader(object):
     def __init__(self, fd):
