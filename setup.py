@@ -26,6 +26,7 @@ setup(
     author=__author__,
     author_email=__author_email__,
     license='MIT',
+    install_requires=['docopt'],
     package_dir={ 
         'devopsbackup': 'devopsbackup'
     },
