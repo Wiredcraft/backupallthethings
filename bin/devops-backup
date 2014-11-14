@@ -126,7 +126,6 @@ def backup(args):
         else:
             raise e
 
-
     # Prepare the implicit services
     if len(args.get('--file', [])) > 0:
         services.add('file')
@@ -167,9 +166,7 @@ def backup(args):
             command.extend(args.get('--redis-db'))
 
         returncode, stdout, stderr = execute(command)
-        print returncode
-        print stdout
-        print stderr
+        # TODO ... something with the data / notification / etc.
 
 def _get_services(path):
     '''

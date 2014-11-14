@@ -10,7 +10,7 @@ from cStringIO import StringIO
 
 PIPE = subprocess.PIPE
 
-# Thanks to http://stackoverflow.com/questions/5486717/python-select-doesnt-signal-all-input-from-pipe
+# http://stackoverflow.com/questions/5486717/python-select-doesnt-signal-all-input-from-pipe
 class LineReader(object):
     def __init__(self, fd):
         self._fd = fd
@@ -68,13 +68,13 @@ def execute(params):
             results[idx].extend(lines)
             for line in lines:
                 if idx == 0:
-                    sys.stdout.write(line)
+                    sys.stdout.write(line +'\n')
                 else:
-                    sys.stderr.write(line)
+                    sys.stderr.write(line +'\n')
 
     # Wait until completion of the process
     while p.returncode == None:
         p.poll()
 
     # return a tuple (code, stdout, stderr)
-    return p.returncode, '\n'.join(results[0]).strip(), '\n'.join(results[1]).strip()
+    return p.returncode, '\n'.join(results[0]), '\n'.join(results[1])
