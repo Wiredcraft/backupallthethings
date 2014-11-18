@@ -1,5 +1,25 @@
+# Purpose
+
+There is many backup framework, with lots of features, encryption, remote storage, incremental backup, you-name-it... Just to name a few [bup](), [bacula](), [zbackup](), [duplicity](), etc.
+
+But those projects often focus on file backup. What about in-memory data? What about databases that need data consistency? 
+
+`devops-backup` try to alleviate that concern by providing a simple way to backup those services. Also it provide a very simple CLI that allows you to backup anything anytime.
+
+No fancy features, it is the poor man's backup. Files are backuped locally only (ATM).
+
+`devops-backup` is a *very* young project and should not be considered stable. The scripts provided to backup each of the services are ... well ... they are what they are. Simple shell scripts; not much safety nets, poor logging / error reporting, may not follow best practices and may seem complete non-sense to experts. 
+
+There is a large [TODO list](https://github.com/devo-ps/devops-backup#todo), feel free to look into it and hack at will!
+
 # Install
 
+From pypi:
+```
+pip install devopsbackup
+```
+
+Latest:
 ```
 pip install git+https://github.com/devo-ps/devops-backup
 ```
