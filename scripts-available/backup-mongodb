@@ -3,7 +3,7 @@
 # devo.ps backup collection
 ##################
 # Description:
-#  CouchDB backup approach is simply to copy the files (when on a single server)
+#  Mongodb backup uses mongodump and backup either all databases, or individually
 ##################
 
 SELF=$(basename -s .sh $0)
@@ -36,30 +36,47 @@ fi
 DEST_FOLDER=$DEST/couchdb
 mkdir -p $DEST_FOLDER
 
-# CouchDB simply require to copy the files
+# MongoDB backups either everything at once or individual databases
 echo "Start $SERVICE data backup"
-if [ ! -d "$COUCHDB_DATA_DIR" ]; then
-    echo "Invalid folder $COUCHDB_DATA_DIR. Skipping."
+args="${@:1}"
+
+if [ ${#args} -eq 0 ]; then
+    # No arguments provided - backup all the databases
+    echo -n "Backup all databases at once."
+
+    # Mongodump dumps the databases in a folder
+    TMP_FOLDER=$(mktemp -d)
+    
+    # TODO add auth support depending on the config file
+    mongodump --out $TMP_FOLDER
+    cd $TMP_FOLDER
+    tar czf $DEST_FOLDER/all_db.tar.gz .
+
+    # Cleanup
+    cd 
+    rm -rf $TMP_FOLDER
+
+    echo "Completed."
 else
-    cd $COUCHDB_DATA_DIR
-    tar czf $DEST_FOLDER/couchdb_data.tar.gz .
-    echo "Completed $SERVICE data backup"
+    # Got arguments - backup databases individually
+    for db in $args
+    do
+        echo -n "Backup database: $db"
+
+        # Mongodump dumps the databases in a folder
+        TMP_FOLDER=$(mktemp -d)
+    
+        # TODO add auth support depending on the config file
+        mongodump --out $TMP_FOLDER --db $db
+        cd $TMP_FOLDER
+        tar czf $DEST_FOLDER/$db.tar.gz .
+
+        # Cleanup
+        cd 
+        rm -rf $TMP_FOLDER
+        echo "Completed."
+    done
 fi
 
-echo "Start $SERVICE log backup"
-if [ ! -d "$COUCHDB_LOG_DIR" ]; then
-    echo "Invalid folder $COUCHDB_LOG_DIR. Skipping."
-else
-    cd $COUCHDB_LOG_DIR
-    tar czf $DEST_FOLDER/couchdb_log.tar.gz .
-    echo "Completed $SERVICE log backup"
-fi
-
-echo "Start $SERVICE conf backup"
-if [ ! -d "$COUCHDB_CONF_DIR" ]; then
-    echo "Invalid folder $COUCHDB_CONF_DIR. Skipping."
-else
-    cd $COUCHDB_CONF_DIR
-    tar czf $DEST_FOLDER/couchdb_conf.tar.gz .
-    echo "Completed $SERVICE conf backup"
-fi
+echo "Completed $SERVICE data backup"
+exit 0

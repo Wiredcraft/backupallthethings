@@ -41,7 +41,7 @@ if [ ! -z "$MYSQL_CREDS" ]; then
     CREDS=" --defaults-extra-file=$MYSQL_CREDS "
 fi
 
-# CouchDB simply require to copy the files
+# MySQL backup either everything at once, or individual databases
 echo "Start $SERVICE data backup"
 args="${@:1}"
 
