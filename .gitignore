@@ -5,3 +5,5 @@ build
 *~
 tmp*
 *log
+*egg-info
+dist
