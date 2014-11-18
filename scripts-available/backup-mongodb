@@ -33,7 +33,7 @@ else
 fi
 
 # Prepare destination folder
-DEST_FOLDER=$DEST/couchdb
+DEST_FOLDER=$DEST/$SERVICE
 mkdir -p $DEST_FOLDER
 
 # MongoDB backups either everything at once or individual databases
