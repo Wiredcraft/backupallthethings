@@ -4,7 +4,7 @@ import sys
 import shutil
 from glob import glob
 
-from backitup import __version__, __author__, __author_email__
+from backupallthethings import __version__, __author__, __author_email__
 
 try:
     from setuptools import setup
@@ -14,7 +14,7 @@ except ImportError:
     sys.exit(1)
     # from distutils.core import setup
 
-base_install = '/opt/backitup'
+base_install = '/opt/batt'
 
 data_files = []
 data_files.append((os.path.join(base_install, 'conf'), glob('./conf/*.conf.template')))
@@ -49,22 +49,22 @@ class install(_install):
 
 setup(
     cmdclass={'install': install},
-    name='backitup',
+    name='backupallthethings',
     version=__version__,
-    description='Backitup simply backup your databases and files',
-    url = 'https://github.com/devo-ps/backitup',
+    description='Batt simply backup all the things; databases and files',
+    url = 'https://github.com/devo-ps/backupallthethings',
     author=__author__,
     author_email=__author_email__,
     license='MIT',
     install_requires=['docopt'],
     package_dir={ 
-        'backitup': 'backitup'
+        'backupallthethings': 'backupallthethings'
     },
     packages=[
-       'backitup'
+       'backupallthethings'
     ],
     scripts=[
-        'bin/backitup'
+        'bin/batt'
     ],
     data_files=data_files
 )

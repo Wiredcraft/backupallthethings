@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """
 Usage: 
-    backitup (--version|--help)
-    backitup list [(enabled|disabled|available)]
-    backitup enable [<service>...]
-    backitup disable [<service>...]
-    backitup purge [--max-days=<max-days>] [--path=<path>]
-    backitup [--path=<path>] [<service>...] 
+    batt (--version|--help)
+    batt list [(enabled|disabled|available)]
+    batt enable [<service>...]
+    batt disable [<service>...]
+    batt purge [--max-days=<max-days>] [--path=<path>]
+    batt [--path=<path>] [<service>...] 
                   [--file=<file>...] [--couchdb-db=<couchdb-db>...]
                   [--mongodb-db=<mongodb-db>...] [--mysql-db=<mysql-db>...]
                   [--postgresql-db=<postgresql-db>...] [--redis-db=<redis-db>...]
@@ -22,17 +22,17 @@ Options:
     --redis-db=<redis-db>...            List of Redis databases to backup (idem)
 
 Help:
-    backitup list                       List the enabled services
-    backitup enable <service>...        Enable the listed services
-    backitup disable <service>...       Disable the listed services
-    backitup purge                      Purge the backup files defined in the path that are over x days
+    batt list                       List the enabled services
+    batt enable <service>...        Enable the listed services
+    batt disable <service>...       Disable the listed services
+    batt purge                      Purge the backup files defined in the path that are over x days
 
-    backitup <service>...               Backup the listed services
-    backitup --file=<file>...           Backup the listed files
-    backitup --mysql-db=<mysql-db>...   Backup the listed mysql-databases
+    batt <service>...               Backup the listed services
+    batt --file=<file>...           Backup the listed files
+    batt --mysql-db=<mysql-db>...   Backup the listed mysql-databases
 
 Note:
-    If no <service> provided, and backitup is invoked without any argument, 
+    If no <service> provided, and batt is invoked without any argument, 
     all the enabled services will be backuped.
 
     If you specify `mysql` as <service> without `--mysql-db`, all databases will be
@@ -48,9 +48,9 @@ Supported services:
     - redis
 
 Each service configuration (access/login/pass) is defined in their respective 
-configuration files under `/opt/backitup/conf`.
+configuration files under `/opt/batt/conf`.
 
-Enabled services are linked in `/opt/backitup/scripts-enabled`
+Enabled services are linked in `/opt/batt/scripts-enabled`
 """
 
 import docopt
@@ -59,10 +59,10 @@ import sys
 import subprocess
 from datetime import datetime
 from time import sleep
-from backitup import __version__, execute
+from backupallthethings import __version__, execute
 
 VALID_SERVICES = ['file','couchdb','mongodb','mysql','postgresql','redis']
-BASE_INSTALL = '/opt/backitup'
+BASE_INSTALL = '/opt/batt'
 
 def list_services(args):
     '''
@@ -140,7 +140,7 @@ def backup(args):
     dest = datetime.now().strftime(args.get('--path'))
 
     # Set environment var for all scripts
-    os.environ.update({'BACKITUP_DEST': dest})
+    os.environ.update({'BATT_DEST': dest})
     try:
         os.makedirs(dest)
     except OSError as e:
@@ -168,12 +168,12 @@ def backup(args):
     if len(services) == 0:
         services = _get_services('scripts-enabled')
 
-    # Still no services, seems like backitup is not configured
+    # Still no services, seems like batt is not configured
     if len(services) == 0:
         sys.stderr.write('No services specified.\n\n')
-        sys.stderr.write('Either add services in the command line. (backitup <service>)\n')
-        sys.stderr.write('Or enable default services (backitup enable <service>).\n\n')
-        sys.stderr.write('Refer to the help for more information. (backitup -h)\n')
+        sys.stderr.write('Either add services in the command line. (batt <service>)\n')
+        sys.stderr.write('Or enable default services (batt enable <service>).\n\n')
+        sys.stderr.write('Refer to the help for more information. (batt -h)\n')
         sys.exit(0)
 
     for service in services:

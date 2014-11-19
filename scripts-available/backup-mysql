@@ -1,6 +1,6 @@
 #!/bin/bash
 ##################
-# backitup collection
+# backupallthethings collection
 ##################
 # Description:
 #  MySQL backup approach is to use `mysqldump`
@@ -10,10 +10,10 @@ SELF=$(basename -s .sh $0)
 SERVICE=${SELF#backup-}
 
 # Data available from ENV
-DEST=$BACKITUP_DEST
+DEST=$BATT_DEST
 
 # 
-CONF_FOLDER=/opt/backitup/conf
+CONF_FOLDER=/opt/batt/conf
 CONF_FILE=$CONF_FOLDER/$SELF.conf
 
 # Load main backup config file
