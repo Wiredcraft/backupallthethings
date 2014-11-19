@@ -132,7 +132,7 @@ You can change the path of the destination folder to be more granular or fully c
     sudo devops-backup --path /opt/backup/%Y/%m/%d/daily
 
 
-More details about the date format is available [here](https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior)
+More details about the date format is available `here <https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior>`_.
 
 Architecture
 ============
