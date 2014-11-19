@@ -5,6 +5,7 @@ Usage:
     devops-backup list [(enabled|disabled|available)]
     devops-backup enable [<service>...]
     devops-backup disable [<service>...]
+    devops-backup purge [--max-days=<max-days>] [--path=<path>]
     devops-backup [--path=<path>] [<service>...] 
                   [--file=<file>...] [--couchdb-db=<couchdb-db>...]
                   [--mongodb-db=<mongodb-db>...] [--mysql-db=<mysql-db>...]
@@ -24,6 +25,7 @@ Help:
     devops-backup list                          List the enabled services
     devops-backup enable <service>...           Enable the listed services
     devops-backup disable <service>...          Disable the listed services
+    devops-backup purge                         Purge the backup files defined in the path that are over x days
 
     devops-backup <service>...                  Backup the listed services
     devops-backup --file=<file>...              Backup the listed files
@@ -92,8 +94,16 @@ def enable(services):
         dest = os.path.join(BASE_INSTALL, 'scripts-enabled', 'backup-'+ service)
         try:
             os.symlink(source, dest)
+            print 'Service %s enabled' % service
+        except OSError as e:
+            # File exist
+            if e.errno == 17:
+                print 'Service %s already enabled' % service
+            else:
+                sys.stderr.write('%s\n' % e) 
         except Exception as e:
-            print e
+            # Don't crash, only print
+            sys.stderr.write('%s\n' % e) 
 
 def disable(services):
     '''
@@ -104,8 +114,22 @@ def disable(services):
         try:
             dest = os.path.join(BASE_INSTALL, 'scripts-enabled', 'backup-'+ service)
             os.unlink(dest)
+            print 'Service %s disabled' % service
+        except OSError as e:
+            # File exist
+            if e.errno == 2:
+                print 'Service %s already disabled' % service
+            else:
+                sys.stderr.write('%s\n' % e) 
         except Exception as e:
-            print e
+            # Don't crash, only print
+            sys.stderr.write('%s\n' % e) 
+
+def purge(args):
+    '''
+    Purge old backup files
+    '''
+    print 'Soon...'
 
 def backup(args):
     '''
@@ -193,7 +217,7 @@ def ensure_root():
     Currently require the run as root (UID=0)
     '''
     if os.getuid() != 0:
-        print 'Currently required to run as root. Either swith to root user or use the sudo command.'
+        sys.stderr.write('Currently required to run as root. Either swith to root user or use the sudo command.\n')
         sys.exit(1)
 
 
@@ -212,6 +236,9 @@ if __name__ == '__main__':
     elif args.get('disable'):
         ensure_root()
         disable(args.get('<service>'))
+    elif args.get('purge'):
+        ensure_root()
+        purge(args)
     else:
         ensure_root()
         backup(args)
