@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """
 Usage: 
-    devops-backup (--version|--help)
-    devops-backup list [(enabled|disabled|available)]
-    devops-backup enable [<service>...]
-    devops-backup disable [<service>...]
-    devops-backup purge [--max-days=<max-days>] [--path=<path>]
-    devops-backup [--path=<path>] [<service>...] 
+    backitup (--version|--help)
+    backitup list [(enabled|disabled|available)]
+    backitup enable [<service>...]
+    backitup disable [<service>...]
+    backitup purge [--max-days=<max-days>] [--path=<path>]
+    backitup [--path=<path>] [<service>...] 
                   [--file=<file>...] [--couchdb-db=<couchdb-db>...]
                   [--mongodb-db=<mongodb-db>...] [--mysql-db=<mysql-db>...]
                   [--postgresql-db=<postgresql-db>...] [--redis-db=<redis-db>...]
@@ -22,17 +22,17 @@ Options:
     --redis-db=<redis-db>...            List of Redis databases to backup (idem)
 
 Help:
-    devops-backup list                          List the enabled services
-    devops-backup enable <service>...           Enable the listed services
-    devops-backup disable <service>...          Disable the listed services
-    devops-backup purge                         Purge the backup files defined in the path that are over x days
+    backitup list                       List the enabled services
+    backitup enable <service>...        Enable the listed services
+    backitup disable <service>...       Disable the listed services
+    backitup purge                      Purge the backup files defined in the path that are over x days
 
-    devops-backup <service>...                  Backup the listed services
-    devops-backup --file=<file>...              Backup the listed files
-    devops-backup --mysql-db=<mysql-db>...      Backup the listed mysql-databases
+    backitup <service>...               Backup the listed services
+    backitup --file=<file>...           Backup the listed files
+    backitup --mysql-db=<mysql-db>...   Backup the listed mysql-databases
 
 Note:
-    If no <service> provided, and devops-backup is invoked without any argument, 
+    If no <service> provided, and backitup is invoked without any argument, 
     all the enabled services will be backuped.
 
     If you specify `mysql` as <service> without `--mysql-db`, all databases will be
@@ -48,9 +48,9 @@ Supported services:
     - redis
 
 Each service configuration (access/login/pass) is defined in their respective 
-configuration files under `/opt/devops/backup/conf`.
+configuration files under `/opt/backitup/conf`.
 
-Enabled services are linked in `/opt/devops/backup/scripts-enabled`
+Enabled services are linked in `/opt/backitup/scripts-enabled`
 """
 
 import docopt
@@ -59,10 +59,10 @@ import sys
 import subprocess
 from datetime import datetime
 from time import sleep
-from devopsbackup import __version__, execute
+from backitup import __version__, execute
 
 VALID_SERVICES = ['file','couchdb','mongodb','mysql','postgresql','redis']
-BASE_INSTALL = '/opt/devops/backup'
+BASE_INSTALL = '/opt/backitup'
 
 def list_services(args):
     '''
@@ -140,7 +140,7 @@ def backup(args):
     dest = datetime.now().strftime(args.get('--path'))
 
     # Set environment var for all scripts
-    os.environ.update({'DEVOPS_BACKUP_DEST': dest})
+    os.environ.update({'BACKITUP_DEST': dest})
     try:
         os.makedirs(dest)
     except OSError as e:
@@ -168,12 +168,12 @@ def backup(args):
     if len(services) == 0:
         services = _get_services('scripts-enabled')
 
-    # Still no services, seems like devops-backup is not configured
+    # Still no services, seems like backitup is not configured
     if len(services) == 0:
         sys.stderr.write('No services specified.\n\n')
-        sys.stderr.write('Either add services in the command line. (devops-backup <service>)\n')
-        sys.stderr.write('Or enable default services (devops-backup enable <service>).\n\n')
-        sys.stderr.write('Refer to the help for more information. (devops-backup -h)\n')
+        sys.stderr.write('Either add services in the command line. (backitup <service>)\n')
+        sys.stderr.write('Or enable default services (backitup enable <service>).\n\n')
+        sys.stderr.write('Refer to the help for more information. (backitup -h)\n')
         sys.exit(0)
 
     for service in services:

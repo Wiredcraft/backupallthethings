@@ -1,6 +1,6 @@
 #!/bin/bash
 ##################
-# devo.ps backup collection
+# backitup collection
 ##################
 # Redis backup approach is simply to copy the files (when on a single server)
 ##################
@@ -9,10 +9,10 @@ SELF=$(basename -s .sh $0)
 SERVICE=${SELF#backup-}
 
 # Data available from ENV
-DEST=$DEVOPS_BACKUP_DEST
+DEST=$BACKITUP_DEST
 
 # 
-CONF_FOLDER=/opt/devops/backup/conf
+CONF_FOLDER=/opt/backitup/conf
 CONF_FILE=$CONF_FOLDER/$SELF.conf
 
 # Load main backup config file
