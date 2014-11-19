@@ -137,7 +137,7 @@ More details about the date format is available `here <https://docs.python.org/2
 Architecture
 ============
 
-backupallthethings
+batt
 -------------
 
 Python based script, effectively parses the various arguments and manage the services list. Then it delegates the work to the services scripts.
