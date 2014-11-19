@@ -1,6 +1,6 @@
 # Purpose
 
-There is many backup framework, with lots of features, encryption, remote storage, incremental backup, you-name-it... Just to name a few [bup](https://bup.github.io/), [bacula](http://www.bacula.org/), [zbackup](http://zbackup.org/), [duplicity](http://duplicity.nongnu.org/), etc.
+There is many backup framework, with lots of features, encryption, remote storage, incremental backup, you-name-it... Just to name a few [bup](https://bup.github.io/), [bacula](http://www.bacula.org/), [zbackup](http://zbackup.org/), [duplicity](http://duplicity.nongnu.org/), [zmanda](http://zmanda.com/), etc.
 
 But those projects often focus on file backup. What about in-memory data? What about databases that need data consistency? 
 
